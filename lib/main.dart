@@ -11,9 +11,20 @@ void main() async {
 
   try {
     // Initialize Firebase
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
+    } catch (e) {
+      // Si ya existe la app, continuamos sin error
+      if (e.toString().contains('duplicate-app')) {
+        debugPrint('Firebase ya estaba inicializado.');
+      } else {
+        rethrow;
+      }
+    }
 
     // Disable persistence for web to avoid hanging
     FirebaseFirestore.instance.settings = const Settings(
