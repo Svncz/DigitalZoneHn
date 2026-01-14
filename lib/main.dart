@@ -1,28 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firebase_options.dart';
-import 'screens/dashboard_page.dart';
-import 'package:flutter_web_plugins/url_strategy.dart'; // Optional: for cleaner URLs
-
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:digitalzonehn/firebase_options.dart';
+import 'package:digitalzonehn/screens/stats_view.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('es');
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // DISABLE PERSISTENCE FOR WEB TO PREVENT HANGS
   try {
+    // Initialize Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    // Disable persistence for web to avoid hanging
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: false,
     );
+
+    await initializeDateFormatting('es_ES', null);
+
+    // Use pathUrlStrategy for clean URLs (if enabled in server)
+    usePathUrlStrategy();
+
+    runApp(const MyApp());
   } catch (e) {
-    // Ignore error
+    print("Initialization Error: $e");
+    runApp(
+      MaterialApp(
+        home: Scaffold(body: Center(child: Text("Error: $e"))),
+      ),
+    );
   }
-  // usePathUrlStrategy(); // Optional
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -34,22 +45,13 @@ class MyApp extends StatelessWidget {
       title: 'DigitalZone Admin',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        primarySwatch: Colors.indigo,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0f172a), // Slate 900
-        primaryColor: const Color(0xFF6366f1), // Indigo 500
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1e293b), // Slate 800
-          elevation: 0,
-        ),
-        cardColor: const Color(0xFF1e293b),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF6366f1),
-          secondary: Color(0xFFec4899), // Pink 500
-          surface: Color(0xFF1e293b),
-        ),
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        fontFamily: 'Outfit',
         useMaterial3: true,
       ),
-      home: const DashboardPage(),
+      home: const StatsView(),
     );
   }
 }

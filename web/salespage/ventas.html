@@ -921,8 +921,8 @@
             <a href="/" class="logo">DigitalZone</a>
             <div style="display: flex; gap: 1.5rem;">
                 <a href="/" class="nav-link active">Inicio</a>
-                <a href="opiniones.html" class="nav-link">Opiniones</a>
-                <a href="combos.html" class="nav-link">Combos</a>
+                <a href="/opiniones" class="nav-link">Opiniones</a>
+                <a href="/combos" class="nav-link">Combos</a>
             </div>
         </div>
         <div class="search-bar">
@@ -958,7 +958,7 @@
             <p style="text-align:center; color: var(--text-gray); width:100%;">Cargando opiniones...</p>
         </div>
         <div style="text-align: center; margin-bottom: 3rem;">
-            <a href="opiniones.html" class="btn-opinion"
+            <a href="/opiniones" class="btn-opinion"
                 style="text-decoration:none; display:inline-block; padding: 0.8rem 1.5rem; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:2rem; color:white; transition:all 0.3s;">
                 <i class="fas fa-star"></i> Ver Todas las Opiniones
             </a>
@@ -987,7 +987,7 @@
     </section>
 
     <footer style="text-align: center; padding: 2rem; color: var(--text-gray); font-size: 0.9rem;">
-        &copy; 2025 DigitalZone. Todos los derechos reservados.
+        &copy; 2025 DigitalZone. Todos los derechos reservados. (v2.0)
     </footer>
 
     <!-- Floating Cart -->
@@ -1557,6 +1557,18 @@
             console.error("❌ Critical Start Error:", err);
         }
 
+    </script>
+    <script>
+        // Force unregister stale service workers from previous Flutter deployment
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister().then(function (boolean) {
+                        console.log('Service Worker unregistered: ', boolean);
+                    });
+                }
+            });
+        }
     </script>
 </body>
 

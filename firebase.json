@@ -1,13 +1,13 @@
 {
     "hosting": {
         "public": "build/web",
+        "cleanUrls": true,
         "ignore": [
             "firebase.json",
             "**/.*",
             "**/node_modules/**"
         ],
-        "rewrites": [
-        ]
+        "rewrites": []
     },
     "firestore": {
         "rules": "firestore.rules",
