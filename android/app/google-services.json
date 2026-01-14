@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "656121260272",
+    "project_id": "digitalzonehn",
+    "storage_bucket": "digitalzonehn.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:656121260272:android:47320d3df90bd5c0f57a35",
+        "android_client_info": {
+          "package_name": "com.example.digitalzonehn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAwnmhUTniq_uxfWFQFTUDESQgWerztqw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
