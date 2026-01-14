@@ -1,181 +1,115 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/stat_card.dart';
 
-class StatsView extends StatefulWidget {
+class StatsView extends StatelessWidget {
   const StatsView({super.key});
 
   @override
-  State<StatsView> createState() => _StatsViewState();
-}
-
-class _StatsViewState extends State<StatsView> {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Panel de Administración'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {});
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Add logout logic if needed
-            },
-          ),
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _db.collection('products').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No hay productos disponibles'));
-          }
-
-          // Calculate stats
-          final products = snapshot.data!.docs;
-          final totalProducts = products.length;
-          final availableProducts = products.where((d) {
-            final data = d.data() as Map<String, dynamic>;
-            return data['available'] != false;
-          }).length;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSummaryCards(totalProducts, availableProducts),
-                const SizedBox(height: 30),
-                const Text(
-                  "Enlace Rápido a Opiniones",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    final Uri url = Uri.parse('/opiniones');
-                    if (!await launchUrl(url)) {
-                      // Handle error
-                    }
-                  },
-                  icon: const Icon(Icons.star),
-                  label: const Text("Ver Opiniones (Web)"),
-                ),
-                const SizedBox(height: 30),
-                const Text(
-                  "Inventario Reciente",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 15),
-                _buildProductList(products),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSummaryCards(int total, int available) {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 15,
-      mainAxisSpacing: 15,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1.5,
-      children: [
-        _statCard("Total Productos", "$total", Colors.blue),
-        _statCard("Disponibles", "$available", Colors.green),
-        // Add more stats here (e.g. Orders)
-      ],
-    );
-  }
-
-  Widget _statCard(String title, String value, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      padding: const EdgeInsets.all(15),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: TextStyle(color: color, fontSize: 16)),
-          const SizedBox(height: 5),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          const Text(
+            'Resumen del Negocio',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          // Products Count
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('products')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text(
+                  'Error: ${snapshot.error}',
+                  style: TextStyle(color: Colors.red),
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData) return const Text('No Data');
+
+              final docs = snapshot.data!.docs;
+              final total = docs.length;
+              final unavailable = docs.where((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return (data['available'] ?? true) == false;
+              }).length;
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: StatCard(
+                      title: 'Productos Totales',
+                      value: total.toString(),
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: StatCard(
+                      title: 'Agotados',
+                      value: unavailable.toString(),
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          // Orders Count
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('orders').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text(
+                  'Error: ${snapshot.error}',
+                  style: TextStyle(color: Colors.red),
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final totalOrders = snapshot.data?.size ?? 0;
+              return StatCard(
+                title: 'Pedidos Recibidos',
+                value: totalOrders.toString(),
+                color: Colors.green,
+              );
+            },
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            'Accesos Directos',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ListTile(
+            tileColor: Colors.white10,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
+            leading: const Icon(Icons.star, color: Colors.yellow),
+            title: const Text('Ver Opiniones (Web)'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () async {
+              // TODO: Update URL to the deployed Firebase Hosting URL
+              final url = Uri.parse(
+                'https://digitalzonehn.web.app/opiniones.html',
+              );
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url);
+              }
+            },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildProductList(List<QueryDocumentSnapshot> docs) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: docs.length,
-      itemBuilder: (context, index) {
-        final data = docs[index].data() as Map<String, dynamic>;
-        return Card(
-          color: const Color(0xFF1E293B),
-          margin: const EdgeInsets.only(bottom: 10),
-          child: ListTile(
-            leading: _buildImage(data['imageUrl']),
-            title: Text(
-              data['name'] ?? 'Sin nombre',
-              style: const TextStyle(color: Colors.white),
-            ),
-            subtitle: Text(
-              "HNL ${data['price']}",
-              style: TextStyle(color: Colors.grey[400]),
-            ),
-            trailing: data['available'] == false
-                ? const Icon(Icons.error, color: Colors.red)
-                : const Icon(Icons.check_circle, color: Colors.green),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildImage(String? url) {
-    if (url == null || url.isEmpty) return const Icon(Icons.image);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(5),
-      child: Image.network(
-        url,
-        width: 50,
-        height: 50,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
       ),
     );
   }
