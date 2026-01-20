@@ -32,6 +32,31 @@
 
   <title>DigitalZone</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- SECURITY: DOMAIN GUARD -->
+  <style id="security-curtain">
+    html,
+    body {
+      display: none !important;
+    }
+  </style>
+  <script>
+    (function () {
+      var allowedDomains = ['digitalzonehn.web.app', 'localhost', '127.0.0.1'];
+      var isAllowed = allowedDomains.some(function (domain) {
+        return window.location.hostname === domain;
+      });
+
+      if (!isAllowed) {
+        // If accessed from digitalzonehn.com, redirect immediately
+        window.location.replace('https://digitalzonehn.com/');
+      } else {
+        // Remove the curtain if domain is allowed
+        var curtain = document.getElementById('security-curtain');
+        if (curtain) curtain.remove();
+      }
+    })();
+  </script>
 </head>
 
 <body>

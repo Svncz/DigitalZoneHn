@@ -1,0 +1,2 @@
+User-agent: *
+Disallow: /Xk9m-523-Lp2z-Qr4v/
