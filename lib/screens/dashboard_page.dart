@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/product_dialog.dart';
 import '../widgets/combo_dialog.dart';
 import '../widgets/banner_dialog.dart';
@@ -36,7 +37,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Text('DigitalZone Admin'),
             Text(
-              'v1.1 (Locale Fix)',
+              'v2.3 (Stable)',
               style: TextStyle(fontSize: 10, color: Colors.white70),
             ),
           ],
@@ -46,6 +47,13 @@ class _DashboardPageState extends State<DashboardPage> {
             icon: const Icon(Icons.campaign),
             onPressed: () => _showBannerConfig(context),
             tooltip: 'Configurar Anuncio',
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.redAccent),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+            },
+            tooltip: 'Cerrar Sesión',
           ),
         ],
       ),

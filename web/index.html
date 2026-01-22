@@ -41,19 +41,36 @@
     }
   </style>
   <script>
-    (function () {
-      var allowedDomains = ['digitalzonehn.web.app', 'localhost', '127.0.0.1'];
-      var isAllowed = allowedDomains.some(function (domain) {
-        return window.location.hostname === domain;
-      });
+    // Configuration to force HTML renderer for better mobile compatibility
+    window.flutterWebRenderer = "html";
+    window.flutterConfiguration = {
+      renderer: "html"
+    };
 
-      if (!isAllowed) {
-        // If accessed from digitalzonehn.com, redirect immediately
-        window.location.replace('https://digitalzonehn.com/');
+    // AGGRESSIVE CACHE BUSTING: Unregister all service workers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          console.log('Unregistering Service Worker:', registration);
+          registration.unregister();
+        }
+      });
+    }
+
+    // JavaScript Domain Guard
+    (function () {
+      var allowedDomains = ['digitalzonehn.web.app', 'www.digitalzonehn.web.app', 'localhost', '127.0.0.1'];
+      var current = window.location.hostname;
+
+      // Check if current domain is allowed
+      if (!allowedDomains.includes(current)) {
+        window.location.href = 'https://digitalzonehn.com/';
       } else {
-        // Remove the curtain if domain is allowed
+        // Safe removal of security curtain
         var curtain = document.getElementById('security-curtain');
-        if (curtain) curtain.remove();
+        if (curtain) {
+          curtain.remove();
+        }
       }
     })();
   </script>

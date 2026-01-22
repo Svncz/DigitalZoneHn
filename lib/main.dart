@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/login_screen.dart';
 import 'screens/dashboard_page.dart';
-import 'package:flutter_web_plugins/url_strategy.dart'; // Optional: for cleaner URLs
 
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -11,30 +12,23 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es');
 
-  // DISABLE PERSISTENCE FOR WEB TO PREVENT HANGS
+  // Initialize Firebase
   try {
-    // Initialize Firebase
-    try {
-      if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-      }
-    } catch (e) {
-      // Si ya existe la app, continuamos sin error
-      if (e.toString().contains('duplicate-app')) {
-        debugPrint('Firebase ya estaba inicializado.');
-      } else {
-        rethrow;
-      }
-    }
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    // If app already exists, ignore
+    debugPrint('Firebase Init Error: $e');
+  }
+
+  // Disable persistence to prevent web hangs
+  try {
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: false,
     );
-  } catch (e) {
-    // Ignore error
-  }
-  // usePathUrlStrategy(); // Optional
+  } catch (_) {}
+
   runApp(const MyApp());
 }
 
@@ -62,7 +56,20 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const DashboardPage(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (snapshot.hasData) {
+            return const DashboardPage();
+          }
+          return const LoginScreen();
+        },
+      ),
     );
   }
 }
