@@ -149,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           // Email Field
                           TextFormField(
                             controller: _emailController,
-                            autofillHints: const [AutofillHints.email],
+                            autofillHints: const [AutofillHints.username],
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
                             style: const TextStyle(color: Colors.white),

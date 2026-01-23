@@ -37,7 +37,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Text('DigitalZone Admin'),
             Text(
-              'v2.3 (Stable)',
+              'v2.6 (Chrome Fix)',
               style: TextStyle(fontSize: 10, color: Colors.white70),
             ),
           ],

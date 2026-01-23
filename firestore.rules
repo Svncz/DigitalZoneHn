@@ -31,6 +31,12 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // Reglas para Configuración (Banner, Anuncios)
+    match /config/{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
     // Fallback for any other collections: Deny all by default
     match /{document=**} {
       allow read, write: if false;
